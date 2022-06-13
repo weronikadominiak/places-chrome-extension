@@ -1,0 +1,42 @@
+.calendar {
+    /* background-color: blueviolet; */
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    grid-column-gap: 2px;
+    grid-row-gap: 2px;
+    max-width: 1184px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.cell {
+    list-style: none;
+    border: 1px solid #cdcdcd;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.name {
+    font-size: 1.5em;
+    font-weight: bold; 
+}
+
+.booked {
+    background-color: #ffc271;
+    font-weight: 800;
+}
+
+.day-number {
+    font-weight: 400;
+}
+
+p {
+    margin: 4px;
+}
