@@ -1,0 +1,14 @@
+{
+  "name": "Places Chrome Extension",
+  "description": "A chrome extension that lets you preview your bookings in more comfortable way",
+  "version": "1.0.0",
+  "manifest_version": 3,
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": ["storage", "activeTab", "scripting"],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "options_page": "options.html"
+}
