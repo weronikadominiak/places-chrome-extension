@@ -1,29 +1,19 @@
-// Initialize button with user's preferred color
-let changeColor = document.getElementById("changeColor");
-
-chrome.storage.sync.get("color", ({ color }) => {
-//   changeColor.style.backgroundColor = color;
-});
-
-
+// Initialize button
+let generateCalendarBtn = document.getElementById("generateCalendarBtn");
 
 // When the button is clicked, inject getBookingDays into current page
-changeColor.addEventListener("click", async () => {
+generateCalendarBtn.addEventListener("click", async () => {
   let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
   chrome.scripting.executeScript({
     target: { tabId: tab.id },
-    function: getBookingDays,
+    function: generateCalendar,
   });
 });
 
-// The body of this function will be executed as a content script inside the
-// current page
-function getBookingDays() {
-  chrome.storage.sync.get("color", ({ color }) => {
-    // document.body.style.backgroundColor = color;
 
-    document.querySelectorAll(".xn-sortable-header")[1].click();
+function generateCalendar() {
+    const generateGoogleLink = (year, month, day, hour, minute, endHour) => `http://www.google.com/calendar/event?action=TEMPLATE&dates=${year}${month}${day}T${hour}${minute}00Z%2F${year}${month}${day}T${endHour}${minute}00&text=Swimming&location=&details=`
 
 
     // Define constants
@@ -43,9 +33,6 @@ function getBookingDays() {
     }
     const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
-    const generateGoogleLink = (year, month, day, hour, minute, endHour) => `http://www.google.com/calendar/event?action=TEMPLATE&dates=${year}${month}${day}T${hour}${minute}00Z%2F${year}${month}${day}T${endHour}${minute}00&text=Swimming&location=&details=`
-
-    
     // Check first day of current month
     const currentMonth = new Date().getMonth();
     const firstDayThisMonth = new Date(new Date().getFullYear(), currentMonth, 1).getDay();
@@ -64,18 +51,15 @@ function getBookingDays() {
         return new Date(dateString);
     });
 
+    // Generate a list of dates for the current month sorted in ascending order
     const bookingsThisMonth = bookedDays.filter(day => day.getMonth() === currentMonth).sort((a,b) => Date.parse(a) - Date.parse(b));
-
-    // console.log(bookingsThisMonth);
-
-
 
     // create calendar view
     const wrapper = document.querySelector("header");
-    const squares = [...DAYS, ...Array(31).keys()]
+    const squares = [...DAYS, ...Array(35).keys()]
     const calendar = document.createElement("ul");
     calendar.className = "calendar";
-    const firstDayInCalendar = firstDayThisMonth + 7 - 1;
+    const firstDayInCalendar = firstDayThisMonth + 7 - 1; // first day of the month is Monday, so we need to add 7 to get to Sunday, -1 to get to 0-index
     let dayIndex = 1;
 
     // generate grid
@@ -83,10 +67,12 @@ function getBookingDays() {
         const cell = document.createElement("li");
         cell.classList.add("cell");
 
+        // assign days to squares
         if (index >= firstDayInCalendar && dayIndex <= 31) {
             cell.innerHTML = `<p class="day-number">${dayIndex}</p>`;
             cell.setAttribute("data-day", dayIndex);
             dayIndex++;
+            // assign days labels
         } else if (index < firstDayInCalendar && index < 7) {
             cell.innerHTML = `<p class="name">${square}</p>`;
         }
@@ -94,33 +80,34 @@ function getBookingDays() {
         calendar.appendChild(cell);
     })
 
+    // assign bookings to correct days
     bookingsThisMonth.forEach(booking => {
         const day = booking.getDate();
         const cell = calendar.querySelector(`[data-day="${day}"]`);
         cell.classList.add("booked");
-        const hour = booking.getHours() < 10 ? `0${booking.getHours()}` : booking.getHours();
-        const endHour = booking.getHours() + 1 < 10 ? `0${booking.getHours() +1}` : booking.getHours() +1;
-        const minutes = booking.getMinutes() < 10 ? `0${booking.getMinutes()}` : booking.getMinutes();
-        cell.innerHTML += `<p>${hour}:${minutes}</p>`;
+  
+        const hour = booking.getHours();
+        const formattedHour = hour < 10 ? `0${hour}` : hour;
+        const formattedEndHour = hour + 1 < 10 ? `0${hour +1}` : hour +1;
+        const minutes = booking.getMinutes();
+        const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+        cell.innerHTML += `<p>${formattedHour}:${formattedMinutes}</p>`;
 
-        console.log(endHour)
-        
-
+        // generate button with Google Calendar link
         const button = document.createElement("a");
         button.classList.add("add-to-calendar");
         button.innerText = "Add to calendar";
-        const date = booking.getDate() < 10 ? `0${booking.getDate()}` : booking.getDate();
-        const correctedMonth = booking.getMonth() + 1;
-        const month = correctedMonth +1 < 10 ? `0${correctedMonth}` : correctedMonth;
-        button.href = generateGoogleLink(booking.getFullYear(), month, date, hour, minutes, endHour);
+        const formattedDay = day < 10 ? `0${day}` : day;
+        const correctedMonth = booking.getMonth() + 1; // get month counts from 0-index
+        const formattedMonth = correctedMonth +1 < 10 ? `0${correctedMonth}` : correctedMonth;
+        button.href = generateGoogleLink(booking.getFullYear(), formattedMonth, formattedDay, formattedHour, formattedMinutes, formattedEndHour);
+        
         cell.appendChild(button);
     })
 
 
     // generate calendar
     wrapper.appendChild(calendar);
-
-  });
 }
 
 

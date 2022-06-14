@@ -4,6 +4,8 @@ button {
   margin: 10px;
   border: none;
   border-radius: 2px;
+  cursor: pointer;
+  background-color: #ffc271;
 }
 
 button.current {
