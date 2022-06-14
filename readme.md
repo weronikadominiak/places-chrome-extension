@@ -10,5 +10,3 @@ My local swimming pool's website doesn't show your bookings in the calendar view
 
 1. Clone this repository
 2. Follow this [official guide]("https://developer.chrome.com/docs/extensions/mv3/getstarted/#unpacked") from Google Developer Documentation.
-
-## See it in action
